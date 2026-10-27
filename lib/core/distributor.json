@@ -1,0 +1,39 @@
+{
+  "success": true,
+  "message": "Distributors fetched successfully",
+  "data": [
+    {
+      "leadId": 1,
+      "name": "Apex Dynamics",
+      "mobileNumber": "+91 9876543210",
+      "location": "Nagpur IT Park, South Block",
+      "photoId": 101,
+      "photoPath": "/photos/apex.jpg",
+      "photoBase64": null,
+      "isDeleted": false,
+      "acquired" : false
+    },
+    {
+      "leadId": 2,
+      "name": "TechNova Solutions",
+      "mobileNumber": "+91 9988776655",
+      "location": "Wardha Road, Nagpur",
+      "photoId": 102,
+      "photoPath": "/photos/technova.jpg",
+      "photoBase64": null,
+      "isDeleted": false,
+      "acquired" : false
+    },
+    {
+      "leadId": 3,
+      "name": "Velocity Motors",
+      "mobileNumber": "+91 8877665544",
+      "location": "Sitabuldi, Nagpur",
+      "photoId": 103,
+      "photoPath": "/photos/velocity.jpg",
+      "photoBase64": null,
+      "isDeleted": false,
+      "acquired" : true
+    }
+  ]
+}
