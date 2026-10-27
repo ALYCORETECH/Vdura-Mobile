@@ -244,6 +244,11 @@ void _onServiceStart(ServiceInstance service) async {
         accuracy: LocationAccuracy.high,
         distanceFilter: 10,
         intervalDuration: const Duration(seconds: 30),
+        foregroundNotificationConfig: const ForegroundNotificationConfig(
+          notificationText: "VDura is tracking your route",
+          notificationTitle: "Active Shift",
+          enableWakeLock: true,
+        ),
       ),
     ).listen(
       record,

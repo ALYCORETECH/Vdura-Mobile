@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
-import 'package:geolocator/geolocator.dart'; // ⬅️ NEW: Required for distance check
+import 'package:geolocator/geolocator.dart';
 import 'package:sales_management/core/services/location/single_location_reader.dart';
 import 'package:sales_management/core/theme/theme.dart';
 import 'package:sales_management/core/utils/ui_feedback_service.dart';
@@ -106,8 +106,14 @@ class _LeadsScreenState extends State<LeadsScreen> with SingleTickerProviderStat
     try {
       final pos = await SingleLocationReader.getCurrentLocation();
 
-      // ── 1. THE PERIMETER CHECK ──
-      // Check if the lead has valid coordinates saved in the database
+      // ── 0. FAKE GPS CHECK ──
+      if (pos.isMocked) {
+        uiFeedback.hideLoader();
+        uiFeedback.showError('Fake Location detected. Please disable mock locations to check in.');
+        return;
+      }
+
+      // ── 1. THE DYNAMIC PERIMETER CHECK (LEADS ONLY) ──
       if (lead.latitude != 0.0 && lead.longitude != 0.0) {
         final distanceInMeters = Geolocator.distanceBetween(
           pos.latitude,
@@ -116,12 +122,20 @@ class _LeadsScreenState extends State<LeadsScreen> with SingleTickerProviderStat
           lead.longitude,
         );
 
-        if (distanceInMeters > 100) {
+        // Define a base radius of 250 meters
+        double allowedRadius = 250.0;
+
+        // Temporarily expand the radius if the phone's GPS is struggling indoors
+        if (pos.accuracy > allowedRadius) {
+          allowedRadius = pos.accuracy;
+        }
+
+        if (distanceInMeters > allowedRadius) {
           uiFeedback.hideLoader();
           uiFeedback.showError(
-            'You are ${distanceInMeters.toStringAsFixed(0)}m away. You must be within 100m to log a visit.',
+            'You are ${distanceInMeters.toStringAsFixed(0)}m away. Move closer to the shop to check in.',
           );
-          return; // Block the geotag completely
+          return;
         }
       }
 
@@ -182,30 +196,45 @@ class _LeadsScreenState extends State<LeadsScreen> with SingleTickerProviderStat
 
   // ── LOG VISIT TO EXISTING DEALER ──
   Future<void> _logVisitToExistingDealer(Dealer dealer) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Log Visit', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: Text('Do you want to geotag a visit to ${dealer.dealerName}?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Log Visit'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm != true) return;
-
     final uiFeedback = UiFeedbackService();
     uiFeedback.showLoader();
 
     try {
+      final pos = await SingleLocationReader.getCurrentLocation();
+
+      // ── 0. FAKE GPS CHECK ──
+      if (pos.isMocked) {
+        uiFeedback.hideLoader();
+        uiFeedback.showError('Fake Location detected. Please disable mock locations to check in.');
+        return;
+      }
+
+      // No perimeter check here since dealers do not have latitude/longitude stored
+      uiFeedback.hideLoader();
+
+      // ── 1. SHOW CONFIRMATION ──
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Log Visit', style: TextStyle(fontWeight: FontWeight.bold)),
+          content: Text('Do you want to geotag a visit to ${dealer.dealerName}?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Log Visit'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirm != true) return;
+
+      // ── 2. PROCESS THE API CALL ──
+      uiFeedback.showLoader();
       final localTrip = await _tokenService.getActiveTrip();
       if (localTrip == null) {
         uiFeedback.hideLoader();
@@ -214,8 +243,6 @@ class _LeadsScreenState extends State<LeadsScreen> with SingleTickerProviderStat
       }
 
       final activeTripId = localTrip['id'] as int;
-      final pos = await SingleLocationReader.getCurrentLocation();
-
       final baseApi = BaseApiService(Dio(), uiFeedback, _tokenService);
       final tripService = TripService(baseApi);
 
