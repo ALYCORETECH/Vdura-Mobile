@@ -53,7 +53,7 @@ class _VanguardeImagePickerState extends State<VanguardeImagePicker> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<VanguardeColors>() ?? VanguardeColors.light;
+    final colors = Theme.of(context).extension<VanguardeColors>()!;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

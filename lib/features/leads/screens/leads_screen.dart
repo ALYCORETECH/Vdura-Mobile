@@ -420,11 +420,15 @@ class _LeadsScreenState extends State<LeadsScreen> with SingleTickerProviderStat
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: _tabController.index == 0 ? _showAddLeadForm : _showAddDealerForm,
-          icon: const Icon(Icons.add),
-          label: Text(_tabController.index == 0 ? 'Add Lead' : 'Add Dealer'),
-        )
+        floatingActionButton: _tabController.index == 0
+            ? FloatingActionButton.extended(
+                onPressed: _showAddLeadForm,
+                backgroundColor: scheme.primary,
+                foregroundColor: scheme.onPrimary,
+                icon: const Icon(Icons.add),
+                label: const Text('Add Lead', style: TextStyle(fontWeight: FontWeight.bold)),
+              )
+            : null,
     );
   }
 }

@@ -6,14 +6,7 @@ import 'package:sales_management/features/auth/screens/authentication_screen.dar
 import 'package:sales_management/features/sales/screens/sales_dashboard_screen.dart';
 
 class AuthCheckScreen extends StatefulWidget {
-  final VoidCallback onToggleTheme;
-  final bool isDark;
-
-  const AuthCheckScreen({
-    super.key,
-    required this.onToggleTheme,
-    required this.isDark,
-  });
+  const AuthCheckScreen({super.key});
 
   @override
   State<AuthCheckScreen> createState() => _AuthCheckScreenState();
@@ -86,10 +79,7 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => VanguardeLoginScreen(
-          onToggleTheme: widget.onToggleTheme,
-          isDark: widget.isDark,
-        ),
+        builder: (context) => const VanguardeLoginScreen(),
       ),
     );
   }

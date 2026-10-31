@@ -37,7 +37,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<VanguardeColors>() ?? VanguardeColors.light;
+    final colors = Theme.of(context).extension<VanguardeColors>()!;
     final scheme = Theme.of(context).colorScheme;
 
     // ── 2. Add ProfileScreen to the indexed stack ──

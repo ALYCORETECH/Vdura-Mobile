@@ -292,7 +292,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<VanguardeColors>() ?? VanguardeColors.light;
+    final colors = Theme.of(context).extension<VanguardeColors>()!;
     final scheme = Theme.of(context).colorScheme;
     final isPunchedIn = _activeTrip != null;
 

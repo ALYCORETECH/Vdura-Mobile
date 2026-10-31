@@ -42,7 +42,7 @@ class VanguardeTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<VanguardeColors>() ?? VanguardeColors.light;
+    final colors = Theme.of(context).extension<VanguardeColors>()!;
     final scheme = Theme.of(context).colorScheme;
 
     return Column(

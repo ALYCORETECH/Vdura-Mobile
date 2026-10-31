@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sales_management/core/services/theme/theme_service.dart';
 
 /// ─────────────────────────────────────────────────────────
 /// VANGUARDE THEME
@@ -85,6 +86,9 @@ class VanguardeColors extends ThemeExtension<VanguardeColors> {
   }
 }
 
+
+// ... (VanguardeColors and other existing code)
+
 class VanguardeTheme {
   // Core brand + surface tokens
   static const _primaryLight = Color(0xFF0F6B52);
@@ -99,33 +103,161 @@ class VanguardeTheme {
   static const _onPrimaryLight = Color(0xFFFFFFFF);
   static const _onPrimaryDark = Color(0xFF062018);
 
-  static ThemeData light = ThemeData(
+  // ── HELPER: BUILDER FOR CONSISTENT COMPONENT STYLING ──
+  static ThemeData _buildTheme({
+    required Brightness brightness,
+    required Color primary,
+    required Color onPrimary,
+    required Color surface,
+    required Color surfaceContainerLow,
+    required Color onSurface,
+    required VanguardeColors colors,
+  }) {
+    final isDark = brightness == Brightness.dark;
+    
+    return ThemeData(
+      useMaterial3: true,
+      brightness: brightness,
+      scaffoldBackgroundColor: surface,
+      fontFamily: 'Sora',
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: primary,
+        brightness: brightness,
+        primary: primary,
+        onPrimary: onPrimary,
+        surface: surface,
+        onSurface: onSurface,
+        surfaceContainerLow: surfaceContainerLow,
+        primaryContainer: primary.withOpacity(isDark ? 0.2 : 0.1),
+        onPrimaryContainer: primary,
+      ),
+      extensions: [colors],
+      textTheme: _textTheme(onSurface),
+      
+      // Minimal, premium bottom navigation
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: surface,
+        elevation: 0,
+        selectedItemColor: primary,
+        unselectedItemColor: colors.subtitle,
+        type: BottomNavigationBarType.fixed,
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 11),
+        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 11),
+      ),
+    );
+  }
+
+  // ── OPTION 1: VANGUARDE SIGNATURE (Your Original Minimal Look) ──
+  static final ThemeData vanguardeLight = _buildTheme(
     brightness: Brightness.light,
-    scaffoldBackgroundColor: _backgroundLight,
-    fontFamily: 'Sora',
-    colorScheme: const ColorScheme.light(
-      primary: _primaryLight,
-      onPrimary: _onPrimaryLight,
-      surface: _backgroundLight,
-      onSurface: _textLight,
-    ),
-    textTheme: _textTheme(_textLight),
-    extensions: const [VanguardeColors.light],
+    primary: _primaryLight,
+    onPrimary: _onPrimaryLight,
+    surface: _backgroundLight,
+    surfaceContainerLow: Colors.white,
+    onSurface: _textLight,
+    colors: VanguardeColors.light,
   );
 
-  static ThemeData dark = ThemeData(
+  static final ThemeData vanguardeDark = _buildTheme(
     brightness: Brightness.dark,
-    scaffoldBackgroundColor: _backgroundDark,
-    fontFamily: 'Sora',
-    colorScheme: const ColorScheme.dark(
-      primary: _primaryDark,
-      onPrimary: _onPrimaryDark,
-      surface: _backgroundDark,
-      onSurface: _textDark,
-    ),
-    textTheme: _textTheme(_textDark),
-    extensions: const [VanguardeColors.dark],
+    primary: _primaryDark,
+    onPrimary: _onPrimaryDark,
+    surface: _backgroundDark,
+    surfaceContainerLow: const Color(0xFF101C18), // Slightly elevated
+    onSurface: _textDark,
+    colors: VanguardeColors.dark,
   );
+
+  // ── OPTION 2: EXECUTIVE SLATE (Corporate Indigo & Midnight) ──
+  static final ThemeData slateLight = _buildTheme(
+    brightness: Brightness.light,
+    primary: const Color(0xFF4F46E5), // Electric Indigo
+    onPrimary: Colors.white,
+    surface: const Color(0xFFF8FAFC), // Cool Gray
+    surfaceContainerLow: Colors.white,
+    onSurface: const Color(0xFF0F172A),
+    colors: const VanguardeColors(
+      statusDot: Color(0xFF4F46E5),
+      kickerText: Color(0xFF64748B),
+      fieldBackground: Color(0xFFF1F5F9),
+      fieldBorder: Color(0xFFE2E8F0),
+      fieldHint: Color(0xFF94A3B8),
+      smallLabel: Color(0xFF64748B),
+      subtitle: Color(0xFF475569),
+    ),
+  );
+
+  static final ThemeData slateDark = _buildTheme(
+    brightness: Brightness.dark,
+    primary: const Color(0xFF6366F1), // Bright Indigo
+    onPrimary: Colors.white,
+    surface: const Color(0xFF020617), // Deep Slate
+    surfaceContainerLow: const Color(0xFF0F172A), // Elevated Slate
+    onSurface: const Color(0xFFF8FAFC),
+    colors: const VanguardeColors(
+      statusDot: Color(0xFF6366F1),
+      kickerText: Color(0xFF94A3B8),
+      fieldBackground: Color(0xFF0F172A),
+      fieldBorder: Color(0xFF1E293B),
+      fieldHint: Color(0xFF475569),
+      smallLabel: Color(0xFF64748B),
+      subtitle: Color(0xFF94A3B8),
+    ),
+  );
+
+  // ── OPTION 3: NORDIC MINIMAL (Rust/Orange & Pure Black OLED) ──
+  static final ThemeData nordicLight = _buildTheme(
+    brightness: Brightness.light,
+    primary: const Color(0xFFDD6B20), // Burnt Orange
+    onPrimary: Colors.white,
+    surface: const Color(0xFFF2F2F7), // Apple Alabaster
+    surfaceContainerLow: Colors.white,
+    onSurface: const Color(0xFF1C1C1E),
+    colors: const VanguardeColors(
+      statusDot: Color(0xFFDD6B20),
+      kickerText: Color(0xFF8E8E93),
+      fieldBackground: Color(0xFFE5E5EA),
+      fieldBorder: Color(0xFFD1D1D6),
+      fieldHint: Color(0xFFAEAEC2),
+      smallLabel: Color(0xFF8E8E93),
+      subtitle: Color(0xFF3A3A3C),
+    ),
+  );
+
+  static final ThemeData nordicDark = _buildTheme(
+    brightness: Brightness.dark,
+    primary: const Color(0xFFF6AD55), // Bright Rust
+    onPrimary: Colors.black,
+    surface: const Color(0xFF000000), // Pure OLED Black
+    surfaceContainerLow: const Color(0xFF1C1C1E), // Dark Iron
+    onSurface: Colors.white,
+    colors: VanguardeColors(
+      statusDot: const Color(0xFFF6AD55),
+      kickerText: const Color(0xFF8E8E93),
+      fieldBackground: const Color(0xFF1C1C1E),
+      fieldBorder: const Color(0xFF2C2C2E),
+      fieldHint: const Color(0xFF48484A),
+      smallLabel: const Color(0xFF636366),
+      subtitle: const Color(0xFF8E8E93),
+    ),
+  );
+
+  // ── DYNAMIC THEME RESOLVER ──
+  static ThemeData getTheme(ThemeStyle style, Brightness brightness) {
+    if (brightness == Brightness.light) {
+      switch (style) {
+        case ThemeStyle.vanguarde: return vanguardeLight;
+        case ThemeStyle.slate: return slateLight;
+        case ThemeStyle.nordic: return nordicLight;
+      }
+    } else {
+      switch (style) {
+        case ThemeStyle.vanguarde: return vanguardeDark;
+        case ThemeStyle.slate: return slateDark;
+        case ThemeStyle.nordic: return nordicDark;
+      }
+    }
+  }
 
   static TextTheme _textTheme(Color baseColor) {
     return TextTheme(

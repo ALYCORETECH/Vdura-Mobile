@@ -10,14 +10,7 @@ import 'package:sales_management/core/widgets/vanguarde_button.dart';
 import 'package:sales_management/features/sales/screens/sales_dashboard_screen.dart';
 
 class VanguardeLoginScreen extends StatefulWidget {
-  final VoidCallback onToggleTheme;
-  final bool isDark;
-
-  const VanguardeLoginScreen({
-    super.key,
-    required this.onToggleTheme,
-    required this.isDark,
-  });
+  const VanguardeLoginScreen({super.key});
 
   @override
   State<VanguardeLoginScreen> createState() => _VanguardeLoginScreenState();
@@ -95,7 +88,7 @@ class _VanguardeLoginScreenState extends State<VanguardeLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<VanguardeColors>() ?? VanguardeColors.light;
+    final colors = Theme.of(context).extension<VanguardeColors>()!;
     final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -105,27 +98,7 @@ class _VanguardeLoginScreenState extends State<VanguardeLoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Theme Toggle
-              Align(
-                alignment: Alignment.centerRight,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.dark_mode_outlined,
-                      size: 16,
-                      color: colors.subtitle,
-                    ),
-                    Switch(
-                      value: widget.isDark,
-                      onChanged: (_) => widget.onToggleTheme(),
-                      activeColor: scheme.primary,
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 32),
+              const SizedBox(height: 16),
 
               // 2. Hero Header Section
               Text(
@@ -164,7 +137,7 @@ class _VanguardeLoginScreenState extends State<VanguardeLoginScreen> {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: widget.isDark ? const Color(0xFF162420) : Colors.white,
+                  color: Theme.of(context).brightness == Brightness.dark ? scheme.surfaceContainerLow : Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: colors.fieldBorder, width: 1),
                   boxShadow: [

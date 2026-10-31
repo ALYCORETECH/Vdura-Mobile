@@ -12,8 +12,8 @@ class BaseApiService {
   final TokenService tokenService;
 
   BaseApiService(this._dio, this._uiFeedbackService, this.tokenService) {
-    _dio.options.baseUrl = 'http://194.163.157.143:8090';
-    // _dio.options.baseUrl = 'http://194.163.157.143:8080';
+    // _dio.options.baseUrl = 'http://194.163.157.143:8090';
+    _dio.options.baseUrl = 'http://194.163.157.143:8080';
     _dio.options.connectTimeout = const Duration(seconds: 10);
 
     _dio.options.receiveTimeout = const Duration(seconds: 20);

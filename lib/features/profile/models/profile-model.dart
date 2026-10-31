@@ -11,8 +11,13 @@ class SalesPersonProfile {
   final String aadharId;
   final String pancard;
   final String addressLine1;
+  final String addressLine2;
+  final String landmark;
+  final String area;
   final String city;
   final String state;
+  final String pinCode;
+  final String country;
   final String? photoBase64;
 
   SalesPersonProfile({
@@ -26,8 +31,13 @@ class SalesPersonProfile {
     required this.aadharId,
     required this.pancard,
     required this.addressLine1,
+    required this.addressLine2,
+    required this.landmark,
+    required this.area,
     required this.city,
     required this.state,
+    required this.pinCode,
+    required this.country,
     this.photoBase64,
   });
 
@@ -43,8 +53,13 @@ class SalesPersonProfile {
       aadharId: json['aadharId'] ?? '',
       pancard: json['pancard'] ?? '',
       addressLine1: json['addressLine1'] ?? '',
+      addressLine2: json['addressLine2'] ?? '',
+      landmark: json['landmark'] ?? '',
+      area: json['area'] ?? '',
       city: json['city'] ?? '',
       state: json['state'] ?? '',
+      pinCode: json['pinCode'] ?? '',
+      country: json['country'] ?? '',
       photoBase64: json['photoBase64'],
     );
   }
