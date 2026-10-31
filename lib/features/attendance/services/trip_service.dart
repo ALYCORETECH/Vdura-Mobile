@@ -1,9 +1,8 @@
-// lib/features/sales/services/trip_service.dart
 import 'package:sales_management/core/services/base_api_service.dart';
 import 'package:sales_management/core/network/api_constants.dart';
 import 'package:sales_management/features/attendance/models/ping_model.dart';
 import 'package:sales_management/features/attendance/models/trip_model.dart';
-
+import 'package:sales_management/core/utils/file_logger.dart';
 
 class TripService {
   final BaseApiService _apiService;
@@ -68,11 +67,16 @@ class TripService {
   }
 
   Future<void> sendBatchPings(int tripId, List<Ping> pings) async {
+    final payload = {
+      "pings": pings.map((p) => p.toJson()).toList(),
+    };
+    
+    // Log the exact payload being sent to the server for debugging
+    FileLogger().d('📤 [API REQ PAYLOAD] /api/trips/$tripId/pings/batch: $payload');
+
     await _apiService.request<dynamic>(
       EndpointConfig(url: '/api/trips/{tripId}/pings/batch', method: 'POST'),
-      body: {
-        "pings": pings.map((p) => p.toJson()).toList(),
-      },
+      body: payload,
       options: VanguardeRequestOptions(
         showLoader: false,
         pathParams: {'tripId': tripId.toString()},

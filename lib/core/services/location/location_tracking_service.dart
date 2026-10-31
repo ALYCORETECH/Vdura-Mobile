@@ -214,6 +214,16 @@ void _onServiceStart(ServiceInstance service) async {
 
   Future<void> record(Position pos) async {
     lastFix = DateTime.now();
+
+    // ── STRICT ACCURACY FILTER (500 METERS) ──
+    // If the phone provides a ping with a margin of error worse than 500 meters
+    // (e.g. 800m because it's using a distant cell tower), we silently discard it
+    // so it doesn't ruin the tracking line on the dashboard map.
+    if (pos.accuracy > 500.0) {
+      FileLogger().w('⚠️ [BACKGROUND] Discarded inaccurate ping. Accuracy: ${pos.accuracy}m');
+      return; 
+    }
+
     await queue.add(
       tripId!,
       Ping(
@@ -241,9 +251,10 @@ void _onServiceStart(ServiceInstance service) async {
     posSub?.cancel();
     posSub = Geolocator.getPositionStream(
       locationSettings: AndroidSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 10,
-        intervalDuration: const Duration(seconds: 30),
+        accuracy: LocationAccuracy.medium, // ⬅️ Accepts up to ~1000m accuracy (Cell/Wi-Fi fallback) to prevent stalls while driving
+        distanceFilter: 0, // ⬅️ Forces a ping every interval
+        intervalDuration: const Duration(seconds: 15),
+        // ── FORCE WAKE LOCK FOR OEM DEVICES ──
         foregroundNotificationConfig: const ForegroundNotificationConfig(
           notificationText: "VDura is tracking your route",
           notificationTitle: "Active Shift",
@@ -275,11 +286,28 @@ void _onServiceStart(ServiceInstance service) async {
           final batch = await queue.peek(tId, limit: 100);
           if (batch.isEmpty) break;
           FileLogger().i('🔵 [BACKGROUND] Syncing ${batch.length} pings for Trip $tId...');
-          await tripService.sendBatchPings(
-              tId, batch.map((r) => r.ping).toList());
-          // Delete ONLY after the server accepted the batch.
-          await queue.delete(batch.map((r) => r.rowId).toList());
-          FileLogger().i('✅ [BACKGROUND] Batch sync successful for Trip $tId!');
+          
+          try {
+            await tripService.sendBatchPings(
+                tId, batch.map((r) => r.ping).toList());
+            // Delete ONLY after the server accepted the batch.
+            await queue.delete(batch.map((r) => r.rowId).toList());
+            FileLogger().i('✅ [BACKGROUND] Batch sync successful for Trip $tId!');
+          } on DioException catch (dioErr) {
+            // ── GRACEFUL ERROR DISCARDING (SWIGGY PATTERN) ──
+            // If the server permanently rejects the pings (e.g. 500 IllegalStateException 
+            // because the trip was auto-closed at 11PM), we MUST delete them locally 
+            // so they don't cause a traffic jam that blocks today's live trip.
+            if (dioErr.response?.statusCode == 500) {
+               final errorData = dioErr.response?.data;
+               if (errorData is Map && errorData['message'].toString().contains('Cannot record pings on a trip that is not ACTIVE')) {
+                  FileLogger().w('⚠️ [BACKGROUND] Server rejected pings for Trip $tId (Trip closed at 11PM). Purging from queue to clear traffic jam.');
+                  await queue.delete(batch.map((r) => r.rowId).toList());
+                  continue; // Loop continues to the next batch or the next Trip ID!
+               }
+            }
+            rethrow; // It's a real network error (like timeout), throw to the outer catch block to retry later
+          }
         }
       }
     } catch (e) {
